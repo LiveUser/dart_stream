@@ -135,7 +135,7 @@ Future<StreamSubscription> runServer({
             throw "No entry file (index.html or index.htm)";
           }
         }else{
-          mimeType = mimalo(filePathOrExtension: request.uri.path);
+          mimeType = mimalo(filePathOrExtension: request.uri.path.toLowerCase());
         }
         if((await requestedFile.exists())){
           if(mimeType != null){
