@@ -4,6 +4,7 @@ import 'package:dart_stream/variables.dart';
 import 'package:flutter/material.dart';
 import 'widgets.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:file_picker/file_picker.dart';
 
 void main() {
   runApp(const MyApp());
@@ -30,7 +31,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  TextEditingController path = TextEditingController();
+  String path = "";
 
   @override
   Widget build(BuildContext context) {
@@ -46,68 +47,54 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 children: [
                   //Add folder path
-                  Row(
-                    children: [
-                      //Clear field text
-                      GestureDetector(
-                        onTap: (){
-                          path.clear();
-                          setState(() {
-
-                          });
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
+                  GestureDetector(
+                    onTap: ()async{
+                      String? filePickerResult = await FilePicker.platform.getDirectoryPath();
+                      if(filePickerResult != null){
+                        path = filePickerResult;
+                      }
+                      //Store path
+                      if(path.isEmpty){
+                        //Do nothing
+                      }else{
+                        storePath(
+                          documentsPath: (snapshot.data as Directory).path, 
+                          pathToStore: path,
+                        );
+                        //Clear field
+                        path = "";
+                        setState(() {
+                          
+                        });
+                      }
+                    },
+                    child: Container(
+                      color: Colors.white,
+                      padding: EdgeInsets.all(20),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.black,
+                            ),
+                            child: Icon(
+                              Icons.save,
+                              color: Colors.white,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.close,
-                            color: Colors.white,
+                          SizedBox(
+                            width: 10,
                           ),
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      //Input Field
-                      Expanded(
-                        child: InputField(
-                          controller: path,
-                        ),
-                      ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      GestureDetector(
-                        onTap: (){
-                          //Store path
-                          if(path.text.isEmpty){
-                            showQuickMessage(context, "Path field must not be empty.");
-                          }else{
-                            storePath(
-                              documentsPath: (snapshot.data as Directory).path, 
-                              pathToStore: path.text,
-                            );
-                            //Clear field
-                            path.clear();
-                            setState(() {
-                              
-                            });
-                          }
-                        },
-                        child: Container(
-                          padding: EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.black,
+                          Expanded(
+                            child: Text(
+                              "Store Location",
+                              textAlign: TextAlign.center,
+                            ),
                           ),
-                          child: Icon(
-                            Icons.save,
-                            color: Colors.white,
-                          ),
-                        ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                   Container(
                     margin: EdgeInsets.symmetric(

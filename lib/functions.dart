@@ -82,7 +82,12 @@ List<Widget> getStoredPaths({
   Entry entry = Entry(
     dbPath: "$documentsPath/rawware/dart_stream",
   );
-  List<DbObject> storedPaths = entry.select().selectMultiple(key: "paths");
+  late List<DbObject> storedPaths;
+  try{
+    storedPaths = entry.select().selectMultiple(key: "paths");
+  }catch(error){
+    storedPaths = [];
+  }
   for(int i = 0; i < storedPaths.length; i++){
     DbObject object = storedPaths[i];
     Map<String,dynamic> data = object.view();
