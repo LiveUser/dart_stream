@@ -117,51 +117,44 @@ void updatePortNumber({
 Future<StreamSubscription> runServer({
   required String path,
   required int port,
-})async{
-  //Create server
-  HttpServer httpServer = await HttpServer.bind(
-    InternetAddress.anyIPv4, 
-    port,
-  );
-  //Handle requests and return stream
-  return httpServer.listen(
-    (request)async{
-      if(request.method == "GET"){
-        File requestedFile = File("$path${request.uri.path}");
-        String? mimeType;
-        if(request.uri.path == "/" || request.uri.path.isEmpty){
-          if((await File("$path/index.html").exists())){
-            requestedFile = File("$path/index.html");
-            mimeType = "text/html";
-          }else if((await File("$path/index.htm").exists())){
-            requestedFile = File("$path/index.htm");
-            mimeType = "text/html";
-          }else{
-            throw "No entry file (index.html or index.htm)";
-          }
-        }else{
-          mimeType = mimalo(filePathOrExtension: request.uri.path.toLowerCase());
-        }
-        if((await requestedFile.exists())){
-          if(mimeType != null){
-            Uint8List bytes = await requestedFile.readAsBytes();
-            request.response.headers.contentType = ContentType.parse(mimeType);
-            request.response.add(bytes);
-          }else{
-            request.response.headers.contentType = ContentType.text;
-            request.response.write("${request.uri.path} invalid file type.");
-          }
-        }else{
-          request.response.headers.contentType = ContentType.text;
-          request.response.statusCode = 404;
-          request.response.write("${request.uri.path} not found.");
-        }
-      }else{
-        //TODO: Add support for more methods in the future. Like for example form submission through POST request.
-        request.response.headers.contentType = ContentType.text;
-        request.response.write("${request.method} is currently an unsupported method.");
+}) async {
+  HttpServer httpServer = await HttpServer.bind(InternetAddress.anyIPv4, port);
+
+  return httpServer.listen((request) async {
+    if (request.method == "GET") {
+      File requestedFile = File("$path${request.uri.path}");
+      File assetsFile = File("$path/assets${request.uri.path}");
+      String? mimeType;
+
+      if (request.uri.path == "/" || request.uri.path.isEmpty) {
+        requestedFile = File("$path/index.html");
+        if (!(await requestedFile.exists())) requestedFile = File("$path/index.htm");
+        mimeType = "text/html";
+      } else {
+        mimeType = mimalo(filePathOrExtension: request.uri.path.toLowerCase());
+        // Fix for 3D Models
+        if (request.uri.path.endsWith('.glb')) mimeType = 'model/gltf-binary';
       }
-      await request.response.close();
-    },
-  );
+
+      // Check Primary Path
+      if (await requestedFile.exists()) {
+        request.response.headers.contentType = ContentType.parse(mimeType ?? "application/octet-stream");
+        await request.response.addStream(requestedFile.openRead());
+      } 
+      // Check Flutter Web Nested Path
+      else if (await assetsFile.exists()) {
+        request.response.headers.contentType = ContentType.parse(mimeType ?? "application/octet-stream");
+        await request.response.addStream(assetsFile.openRead());
+      } 
+      // Handle "Not Found" properly
+      else {
+        request.response.statusCode = 404; // This prevents the SyntaxError in the browser
+        request.response.write("Not Found");
+      }
+    } else {
+      request.response.statusCode = 405;
+      request.response.write("Method not supported.");
+    }
+    await request.response.close();
+  });
 }
