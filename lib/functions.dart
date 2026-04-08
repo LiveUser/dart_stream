@@ -124,7 +124,7 @@ Future<StreamSubscription> runServer({
     if (request.method == "GET") {
       File requestedFile = File("$path${request.uri.path}");
       File assetsFile = File("$path/assets${request.uri.path}");
-      String? mimeType;
+      String mimeType;
 
       if (request.uri.path == "/" || request.uri.path.isEmpty) {
         requestedFile = File("$path/index.html");
@@ -132,18 +132,16 @@ Future<StreamSubscription> runServer({
         mimeType = "text/html";
       } else {
         mimeType = mimalo(filePathOrExtension: request.uri.path.toLowerCase());
-        // Fix for 3D Models
-        if (request.uri.path.endsWith('.glb')) mimeType = 'model/gltf-binary';
       }
 
       // Check Primary Path
       if (await requestedFile.exists()) {
-        request.response.headers.contentType = ContentType.parse(mimeType ?? "application/octet-stream");
+        request.response.headers.contentType = ContentType.parse(mimeType);
         await request.response.addStream(requestedFile.openRead());
       } 
       // Check Flutter Web Nested Path
       else if (await assetsFile.exists()) {
-        request.response.headers.contentType = ContentType.parse(mimeType ?? "application/octet-stream");
+        request.response.headers.contentType = ContentType.parse(mimeType);
         await request.response.addStream(assetsFile.openRead());
       } 
       // Handle "Not Found" properly
