@@ -196,10 +196,10 @@ packages:
     dependency: "direct main"
     description:
       name: mimalo
-      sha256: "3fd42db7cde8ece6def05f2b39613b5af4a58e70832c6a78adf387bb2b04616d"
+      sha256: "66b2c7bf05672d5a36d1841ad6c99d85a98a208ad4f852da30ae6ac266d03cd8"
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.5+6"
+    version: "0.0.6+7"
   normalizer:
     dependency: transitive
     description:
