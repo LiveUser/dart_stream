@@ -1,3 +1,6 @@
+# 0.0.6+6
+- Updated dependency objective_db which uses BSON instead of JSON
+
 # 0.0.5+5
 - Updated the dependency on mimalo to support more data types
 
