@@ -72,8 +72,7 @@ void removePath({
   Entry entry = Entry(
     dbPath: "$documentsPath/rawware/dart_stream",
   );
-  List<DbObject> objects = entry.select().selectMultiple(key: "paths");
-  entry.select().delete(key: "paths", uuid: objects[index].view()["uuid"]);
+  entry.select().pop(index: index, key: "paths");
 }
 List<Widget> getStoredPaths({
   required String documentsPath,
